@@ -1,40 +1,14 @@
 //
-//  CollectionViews.swift
+//  SectionCollectionView.swift
 //  Example
 //
-//  Created by arasan01 on 2022/08/25.
+//  Created by arasan01 on 2022/08/26.
 //
 
 import SwiftUI
 import CollectionViewRepresentation
 
-struct CollectionViews: View {
-    
-    let layout: UICollectionViewLayout?
-    
-    @State var texts: [TextGram] = TextGram.mock
-    
-    var body: some View {
-        CollectionView(
-            collections: texts,
-            viewLayout: layout
-        ) { (_, data: TextGram) in
-            VStack {
-                Rectangle()
-                    .foregroundColor(.orange.opacity(0.7))
-                    .padding(8)
-                Text(data.word)
-            }
-            .background(Color.blue.opacity(0.3))
-        }
-        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
-            self.texts = self.texts.map({ $0 })
-        }
-    }
-}
-
-struct CollectionViews_Previews: PreviewProvider {
-    
+struct SectionCollectionView: View {
     static func createLayout() -> UICollectionViewLayout {
         
         let config = UICollectionViewCompositionalLayoutConfiguration()
@@ -46,7 +20,7 @@ struct CollectionViews_Previews: PreviewProvider {
             let badgeAnchor = NSCollectionLayoutAnchor(edges: [.top, .trailing], fractionalOffset: CGPoint(x: 0, y: 0))
             let badgeSize = NSCollectionLayoutSize(widthDimension: .absolute(20),
                                                    heightDimension: .absolute(20))
-
+            
             let leadingItem = NSCollectionLayoutItem(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(1.0))
             )
@@ -71,7 +45,56 @@ struct CollectionViews_Previews: PreviewProvider {
         return layout
     }
     
+    @State var texts: [TextGram] = TextGram.mock
+    
+    var body: some View {
+        CollectionView(
+            collections: texts,
+            collectionSection: [Section.main, .sub, .bench],
+            viewLayout: Self.createLayout()
+        ) { (snapshot: inout NSDiffableDataSourceSnapshot<Section, TextGram.ID>, collections: [TextGram]) in
+            for data in collections {
+                switch Float.random(in: 0...1) {
+                case 0..<0.333:
+                    snapshot.appendItems([data.id], toSection: .main)
+                case 0.333..<0.666:
+                    snapshot.appendItems([data.id], toSection: .sub)
+                case 0.666...1.0:
+                    snapshot.appendItems([data.id], toSection: .bench)
+                default:
+                    fatalError("logic miss")
+                }
+            }
+        } content: { (section: Section, data: TextGram) in
+            switch section {
+            case .main:
+                Rectangle()
+                    .foregroundColor(.orange.opacity(0.7))
+                    .padding(8)
+                Text(data.word)
+                    .foregroundColor(.red)
+            case .sub:
+                Rectangle()
+                    .foregroundColor(.orange.opacity(0.7))
+                    .padding(8)
+                Text(data.word)
+                    .foregroundColor(.green)
+            case .bench:
+                Rectangle()
+                    .foregroundColor(.orange.opacity(0.7))
+                    .padding(8)
+                Text(data.word)
+                    .foregroundColor(.blue)
+            }
+        }
+        .onReceive(Timer.publish(every: refreshTimeInterval, on: .main, in: .common).autoconnect()) { _ in
+            self.texts = self.texts.map({ $0 })
+        }
+    }
+}
+
+struct SectionCollectionView_Previews: PreviewProvider {
     static var previews: some View {
-        CollectionViews(layout: createLayout())
+        SectionCollectionView()
     }
 }

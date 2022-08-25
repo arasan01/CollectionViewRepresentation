@@ -8,7 +8,7 @@
 import SwiftUI
 import CollectionViewRepresentation
 
-struct ContentView: View {
+struct FullComplexCollectionView: View {
     
     static func createLayout1() -> UICollectionViewLayout {
         
@@ -72,18 +72,17 @@ struct ContentView: View {
     
     static func createLayout2() -> UICollectionViewLayout {
         let itemSize = NSCollectionLayoutSize(
-            widthDimension: .estimated(10),
+            widthDimension: .estimated(40),
             heightDimension: .fractionalHeight(1.0))
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(44))
+            heightDimension: .estimated(80))
         let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
         let section = NSCollectionLayoutSection(group: group)
+        section.interGroupSpacing = 20
         return UICollectionViewCompositionalLayout(section: section)
     }
-    
-    let layout: UICollectionViewLayout?
     
     @State var texts: [TextGram] = TextGram.mock
     @State var segment: SegmentState = .v1
@@ -107,9 +106,9 @@ struct ContentView: View {
             viewLayout: { () -> UICollectionViewLayout in
                 switch segment {
                 case .v1:
-                    return ContentView.createLayout1()
+                    return FullComplexCollectionView.createLayout1()
                 case .v2:
-                    return ContentView.createLayout2()
+                    return FullComplexCollectionView.createLayout2()
                 case .v3:
                     return UICollectionViewCompositionalLayout.list(using: .init(appearance: .plain))
                 }
@@ -134,7 +133,7 @@ struct ContentView: View {
             case .badge1, .badge2:
                 ZStack {
                     Capsule()
-                        .frame(width: 20, height: 20)
+                        .frame(width: 25, height: 25)
                         .foregroundColor(.red)
                     Text("13")
                         .foregroundColor(.white)
@@ -149,46 +148,25 @@ struct ContentView: View {
                 Text(data.word)
                     .foregroundColor(.red)
             case .sub:
-                Rectangle()
-                    .foregroundColor(.orange.opacity(0.7))
-                    .padding(8)
                 Text(data.word)
                     .foregroundColor(.green)
-            case .bench:
                 Rectangle()
                     .foregroundColor(.orange.opacity(0.7))
                     .padding(8)
-                Text(data.word)
-                    .foregroundColor(.blue)
+            case .bench:
+                ZStack {
+                    Rectangle()
+                        .foregroundColor(.orange.opacity(0.7))
+                        .padding(8)
+                    Text(data.word)
+                        .foregroundColor(.blue)
+                }
             }
         }
-        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
+        .onReceive(Timer.publish(every: refreshTimeInterval, on: .main, in: .common).autoconnect()) { _ in
             self.texts = self.texts.map({ $0 })
         }
         
         Spacer()
-    }
-}
-
-struct ContentView_Previews: PreviewProvider {
-    static func createLayout() -> UICollectionViewLayout {
-        let itemSize = NSCollectionLayoutSize(
-            widthDimension: .estimated(10),
-            heightDimension: .fractionalHeight(1.0))
-        let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        let groupSize = NSCollectionLayoutSize(
-            widthDimension: .fractionalWidth(1.0),
-            heightDimension: .estimated(44))
-        let group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
-        let section = NSCollectionLayoutSection(group: group)
-        return UICollectionViewCompositionalLayout(section: section)
-    }
-    
-    static var previews: some View {
-        ContentView(layout: nil)
-        
-        ContentView(layout: Self.createLayout())
-        
-        ContentView(layout: .tagCloud())
     }
 }

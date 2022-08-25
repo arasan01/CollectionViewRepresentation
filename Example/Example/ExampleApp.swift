@@ -12,7 +12,7 @@ struct ExampleApp: App {
     
     var body: some Scene {
         WindowGroup {
-            ContentView(layout: ContentView.createLayout1())
+            OutlineView()
         }
     }
 }
