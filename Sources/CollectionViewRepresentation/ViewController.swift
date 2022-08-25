@@ -61,15 +61,15 @@ extension CollectionView {
             }
             
             let supplementaryRegistrations = coordinator.view.supplementaryKinds.map { kind in
-                UICollectionView.SupplementaryRegistration<CustomSupplementaryView<AnyView>>(
+                UICollectionView.SupplementaryRegistration<CustomSupplementaryView<SupplementaryContent>>(
                     elementKind: kind
-                ) { (supplementaryView: CustomSupplementaryView<AnyView>, elementKind: String, indexPath: IndexPath) in
+                ) { (supplementaryView: CustomSupplementaryView<SupplementaryContent>, elementKind: String, indexPath: IndexPath) in
                     guard
                         let dataId = self.dataSource.itemIdentifier(for: indexPath),
                         let data = self.coordinator.view.collections.first(where: {$0.id == dataId})
                     else { return }
-                    print(data)
-                    supplementaryView.cellContent = AnyView(Text("supplementary-\(elementKind), \(indexPath.section)"))
+                    supplementaryView.cellContent = self.coordinator.view
+                        .supplementaryContent(elementKind, data)
                 }
             }
             

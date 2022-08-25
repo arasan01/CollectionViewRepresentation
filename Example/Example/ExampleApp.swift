@@ -17,11 +17,28 @@ struct ExampleApp: App {
         let layout = UICollectionViewCompositionalLayout(sectionProvider: {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             
-            let leadingItem = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(1.0)))
+            let badgeAnchor = NSCollectionLayoutAnchor(edges: [.top, .trailing], fractionalOffset: CGPoint(x: 0, y: 0))
+            let badgeSize = NSCollectionLayoutSize(widthDimension: .absolute(20),
+                                                   heightDimension: .absolute(20))
+            let badge1 = NSCollectionLayoutSupplementaryItem(
+                layoutSize: badgeSize,
+                elementKind: Supplementary.badge1.rawValue,
+                containerAnchor: badgeAnchor)
             
-            let trailingItem = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.3)))
+            let badge2 = NSCollectionLayoutSupplementaryItem(
+                layoutSize: badgeSize,
+                elementKind: Supplementary.badge2.rawValue,
+                containerAnchor: badgeAnchor)
+            
+            let leadingItem = NSCollectionLayoutItem(
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(1.0)),
+                supplementaryItems: [badge1]
+            )
+            
+            let trailingItem = NSCollectionLayoutItem(
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.3)),
+                supplementaryItems: [badge2]
+            )
             let trailingGroup = NSCollectionLayoutGroup.vertical(layoutSize: NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(0.3), heightDimension: .fractionalHeight(1.0)),
                                                                  subitem: trailingItem,
@@ -36,10 +53,15 @@ struct ExampleApp: App {
             let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                    heightDimension: .estimated(44)),
-                elementKind: "header",
+                elementKind: Supplementary.header.rawValue,
                 alignment: .top)
+            let sectionFooter = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(44)),
+                elementKind: Supplementary.footer.rawValue,
+                alignment: .bottom)
             sectionHeader.pinToVisibleBounds = true
-            section.boundarySupplementaryItems = [sectionHeader]
+            section.boundarySupplementaryItems = [sectionHeader, sectionFooter]
             section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
             return section
             

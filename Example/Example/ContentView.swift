@@ -12,6 +12,10 @@ enum Section: Int {
     case main, sub, bench
 }
 
+enum Supplementary: String {
+    case header, footer, badge1, badge2
+}
+
 struct ContentView: View {
     let layout: UICollectionViewLayout?
     
@@ -21,9 +25,13 @@ struct ContentView: View {
         CollectionView(
             collections: texts,
             collectionSection: [Section.main, .sub, .bench],
-            supplementaryKinds: ["header"],
-            viewLayout: layout,
-            snapshotCustomize: { snapshot, collections in
+            supplementaryKinds: [
+                Supplementary.header.rawValue,
+                Supplementary.footer.rawValue,
+                Supplementary.badge1.rawValue,
+                Supplementary.badge2.rawValue,
+            ],
+            viewLayout: layout) { snapshot, collections in
                 for data in collections {
                     switch Float.random(in: 0...1) {
                     case 0..<0.333:
@@ -36,52 +44,60 @@ struct ContentView: View {
                         fatalError("logic miss")
                     }
                 }
+            } supplementaryContent: { (kind: String, data: TextGram) in
+                switch Supplementary(rawValue: kind)! {
+                case .header, .footer:
+                    Text("\(kind) - supplementary")
+                case .badge1, .badge2:
+                    ZStack {
+                        Capsule()
+                            .frame(width: 20, height: 20)
+                            .foregroundColor(.red)
+                        Text("13")
+                            .foregroundColor(.white)
+                    }
+                }
+            } content: { (section: Section, data: TextGram) in
+                switch section {
+                case .main:
+                    Button {
+                        print(data.word)
+                    } label: {
+                        VStack {
+                            Rectangle()
+                            Text("\(data.index)")
+                            Text("\(data.word)")
+                            
+                        }
+                        .padding(4)
+                    }
+                    .buttonStyle(.plain)
+                case .sub:
+                    Button {
+                        print(data.word)
+                    } label: {
+                        VStack {
+                            Text("\(data.index)")
+                            Rectangle()
+                            Text("\(data.word)")
+                        }
+                        .padding(4)
+                    }
+                    .buttonStyle(.plain)
+                case .bench:
+                    Button {
+                        print(data.word)
+                    } label: {
+                        VStack {
+                            Text("\(data.index)")
+                            Text("\(data.word)")
+                            Rectangle()
+                        }
+                        .padding(4)
+                    }
+                    .buttonStyle(.plain)
+                }
             }
-        ) { (section: Section, data: TextGram) in
-            switch section {
-            case .main:
-                Button {
-                    print(data.word)
-                } label: {
-                    VStack {
-                        Rectangle()
-                        Text("\(data.index)")
-                        Text("\(data.word)")
-                        
-                    }
-                    .padding(4)
-                    .background(Color.blue.opacity(0.3))
-                }
-                .buttonStyle(.plain)
-            case .sub:
-                Button {
-                    print(data.word)
-                } label: {
-                    VStack {
-                        Text("\(data.index)")
-                        Rectangle()
-                        Text("\(data.word)")
-                    }
-                    .padding(4)
-                    .background(Color.blue.opacity(0.3))
-                }
-                .buttonStyle(.plain)
-            case .bench:
-                Button {
-                    print(data.word)
-                } label: {
-                    VStack {
-                        Text("\(data.index)")
-                        Text("\(data.word)")
-                        Rectangle()
-                    }
-                    .padding(4)
-                    .background(Color.blue.opacity(0.3))
-                }
-                .buttonStyle(.plain)
-            }
-            
-        }
         .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
             self.texts = self.texts.map({ $0 })
         }
