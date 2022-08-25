@@ -9,32 +9,39 @@ where
     Collections.Element : Identifiable,
     Section : Hashable,
     Section : Sendable,
+    Section : RawRepresentable,
+    Section.RawValue == Int,
     CellContent : View
 {
     
     public typealias ViewData = Collections.Element
-    public typealias Content = (ViewData) -> CellContent
+    public typealias Content = (Section, ViewData) -> CellContent
+    public typealias SnapshotCustomize = (inout NSDiffableDataSourceSnapshot<Section, ViewData.ID>, Collections) -> Void
     public typealias RawCustomize = (UICollectionView) -> Void
     
     let collections: Collections
     let content: Content
     let collectionSection: [Section]
+    let snapshotCustomize: SnapshotCustomize?
     let rawCustomize: RawCustomize?
     let viewLayout: UICollectionViewLayout?
     
     public init(
         collections: Collections,
-        viewLayout: UICollectionViewLayout? = nil,
-        rawCustomize: RawCustomize? = nil,
         collectionSection: [Section],
-        content: @escaping Content)
+        viewLayout: UICollectionViewLayout? = nil,
+        snapshotCustomize: SnapshotCustomize? = nil,
+        rawCustomize: RawCustomize? = nil,
+        @ViewBuilder content: @escaping Content)
     {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
         self.collectionSection = collectionSection
+        self.snapshotCustomize = snapshotCustomize
         self.content = content
     }
+    
     
     public func makeCoordinator() -> Coordinator {
         return Coordinator(view: self)
@@ -53,6 +60,7 @@ where
             viewController.collectionView.collectionViewLayout = viewLayout
         }
         self.rawCustomize?(viewController.collectionView)
+        viewController.apply(for: collections)
     }
 }
 
@@ -66,17 +74,5 @@ extension CollectionView {
         init(view: CollectionView) {
             self.view = view
         }
-        
-        deinit {
-            print("Coordinator")
-        }
     }
 }
-
-//struct CollectionView_PrewviewProvider: PreviewProvider {
-//    static var previews: some View {
-//        CollectionView(collections: TextGram.mock) { data in
-//            Text("\(data.id): \(data.word), \(data.index)")
-//        }
-//    }
-//}

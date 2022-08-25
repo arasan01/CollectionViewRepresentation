@@ -8,23 +8,81 @@
 import SwiftUI
 import CollectionViewRepresentation
 
+enum Section: Int {
+    case main, sub, bench
+}
+
 struct ContentView: View {
     let layout: UICollectionViewLayout?
     
+    @State var texts: [TextGram] = TextGram.mock
+    
     var body: some View {
         CollectionView(
-            collections: TextGram.mock,
+            collections: texts,
+            collectionSection: [Section.main, .sub, .bench],
             viewLayout: layout,
-            collectionSection: [1,2]
-        ) { data in
-            Button {
-                print(data.word)
-            } label: {
-                Text("\(data.word)")
+            snapshotCustomize: { snapshot, collections in
+                for data in collections {
+                    switch Float.random(in: 0...1) {
+                    case 0..<0.333:
+                        snapshot.appendItems([data.id], toSection: .main)
+                    case 0.333..<0.666:
+                        snapshot.appendItems([data.id], toSection: .sub)
+                    case 0.666...1.0:
+                        snapshot.appendItems([data.id], toSection: .bench)
+                    default:
+                        fatalError("logic miss")
+                    }
+                }
+            }
+        ) { (section: Section, data: TextGram) in
+            switch section {
+            case .main:
+                Button {
+                    print(data.word)
+                } label: {
+                    VStack {
+                        Rectangle()
+                        Text("\(data.index)")
+                        Text("\(data.word)")
+                        
+                    }
                     .padding(4)
                     .background(Color.blue.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+            case .sub:
+                Button {
+                    print(data.word)
+                } label: {
+                    VStack {
+                        Text("\(data.index)")
+                        Rectangle()
+                        Text("\(data.word)")
+                    }
+                    .padding(4)
+                    .background(Color.blue.opacity(0.3))
+                }
+                .buttonStyle(.plain)
+            case .bench:
+                Button {
+                    print(data.word)
+                } label: {
+                    VStack {
+                        Text("\(data.index)")
+                        Text("\(data.word)")
+                        Rectangle()
+                    }
+                    .padding(4)
+                    .background(Color.blue.opacity(0.3))
+                }
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
+            
+        }
+        .onReceive(Timer.publish(every: 1.5, on: .main, in: .common).autoconnect()) { _ in
+            self.texts = self.texts.map({ $0 })
         }
     }
 }

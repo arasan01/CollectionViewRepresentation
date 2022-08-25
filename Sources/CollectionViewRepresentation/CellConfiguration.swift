@@ -9,11 +9,9 @@ extension CollectionView {
         var cellContent: CellContent? = nil
         
         override func updateConfiguration(using state: UICellConfigurationState) {
-            guard let cellContent else {
-                return
-            }
+            guard let cellContent else { return }
             if #available(iOS 16.0, *) {
-                contentConfiguration = UIHostingConfiguration(content: { cellContent })
+                contentConfiguration = UIHostingConfiguration(content: { cellContent }).margins(.all, 0.0)
             } else {
                 contentConfiguration = UIHostingConfigurationBackport(content: { cellContent })
             }

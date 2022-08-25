@@ -14,10 +14,6 @@ extension CollectionView {
             configureCollectionView()
         }
         
-        deinit {
-            print("CollectionView - ViewController")
-        }
-        
         required init?(coder: NSCoder) {
             fatalError("In no way is this class related to an interface builder file.")
         }
@@ -26,6 +22,18 @@ extension CollectionView {
             super.viewDidLoad()
             configureHierarchy()
             configureDataSource()
+        }
+        
+        public func apply(for newCollections: Collections) {
+            var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData.ID>()
+            if let apply = coordinator.view.snapshotCustomize {
+                snapshot.appendSections(coordinator.view.collectionSection)
+                apply(&snapshot, newCollections)
+            } else {
+                snapshot.appendSections(coordinator.view.collectionSection)
+                snapshot.appendItems(coordinator.view.collections.map(\.id))
+            }
+            dataSource.apply(snapshot, animatingDifferences: true)
         }
         
         private func configureCollectionView() {
@@ -44,7 +52,11 @@ extension CollectionView {
         private func configureDataSource() {
             let cellRegistration = UICollectionView.CellRegistration<CustomConfigurationCell, ViewData> {
                 (cell: CustomConfigurationCell, indexPath: IndexPath, data: ViewData) in
-                cell.cellContent = self.coordinator.view.content(data)
+                guard let section = Section(rawValue: indexPath.section) else {
+                    cell.cellContent = self.coordinator.view.content(Section(rawValue: 0)!, data)
+                    return
+                }
+                cell.cellContent = self.coordinator.view.content(section, data)
             }
             
             dataSource = UICollectionViewDiffableDataSource<Section, ViewData.ID>(collectionView: collectionView) {
@@ -55,10 +67,14 @@ extension CollectionView {
                     item: self.coordinator.view.collections.first {$0.id == dataId})
             }
             
-            // initial data
             var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData.ID>()
-            snapshot.appendSections(coordinator.view.collectionSection)
-            snapshot.appendItems(coordinator.view.collections.map(\.id))
+            if let apply = coordinator.view.snapshotCustomize {
+                snapshot.appendSections(coordinator.view.collectionSection)
+                apply(&snapshot, coordinator.view.collections)
+            } else {
+                snapshot.appendSections(coordinator.view.collectionSection)
+                snapshot.appendItems(coordinator.view.collections.map(\.id))
+            }
             dataSource.apply(snapshot, animatingDifferences: false)
         }
     }
