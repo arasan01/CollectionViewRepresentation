@@ -42,7 +42,6 @@ where
         self.content = content
     }
     
-    
     public func makeCoordinator() -> Coordinator {
         return Coordinator(view: self)
     }

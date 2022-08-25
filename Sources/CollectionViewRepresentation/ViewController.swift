@@ -14,6 +14,7 @@ extension CollectionView {
             configureCollectionView()
         }
         
+        @available(*, unavailable)
         required init?(coder: NSCoder) {
             fatalError("In no way is this class related to an interface builder file.")
         }
