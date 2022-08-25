@@ -6,11 +6,12 @@
 //
 
 import SwiftUI
+import UIKit
 import CollectionViewRepresentation
 
 struct SimpleCollectionView: View {
     
-    static func createLayout() -> UICollectionViewLayout {
+    static func createLayout(behavior: UICollectionLayoutSectionOrthogonalScrollingBehavior) -> UICollectionViewLayout {
         
         let config = UICollectionViewCompositionalLayoutConfiguration()
         config.interSectionSpacing = 20
@@ -39,7 +40,7 @@ struct SimpleCollectionView: View {
                                                    heightDimension: .fractionalHeight(0.4)),
                 subitems: [leadingItem, trailingGroup])
             let section = NSCollectionLayoutSection(group: containerGroup)
-            section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
+            section.orthogonalScrollingBehavior = behavior
             return section
             
         }, configuration: config)
@@ -47,11 +48,22 @@ struct SimpleCollectionView: View {
     }
     
     @State var texts: [TextGram] = TextGram.mock
+    @State var behaviorState: UICollectionLayoutSectionOrthogonalScrollingBehavior = .continuous
     
     var body: some View {
+        Picker("behavior", selection: $behaviorState) {
+            Text("none").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.none)
+            Text("continuous").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.continuous)
+            Text("continuousGroupLeadingBoundary").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.continuousGroupLeadingBoundary)
+            Text("paging").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.paging)
+            Text("groupPaging").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.groupPaging)
+            Text("groupPagingCentered").tag(UICollectionLayoutSectionOrthogonalScrollingBehavior.groupPagingCentered)
+        }
+        .pickerStyle(.menu)
+        
         CollectionView(
             collections: texts,
-            viewLayout: Self.createLayout()
+            viewLayout: Self.createLayout(behavior: behaviorState)
         ) { (_, data: TextGram) in
             VStack {
                 Rectangle()
@@ -64,6 +76,7 @@ struct SimpleCollectionView: View {
         .onReceive(Timer.publish(every: refreshTimeInterval, on: .main, in: .common).autoconnect()) { _ in
             self.texts = self.texts.map({ $0 })
         }
+        Spacer()
     }
 }
 
