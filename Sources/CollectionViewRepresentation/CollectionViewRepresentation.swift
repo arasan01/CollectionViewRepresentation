@@ -22,6 +22,7 @@ where
     let collections: Collections
     let content: Content
     let collectionSection: [Section]
+    let supplementaryKinds: [String]
     let snapshotCustomize: SnapshotCustomize?
     let rawCustomize: RawCustomize?
     let viewLayout: UICollectionViewLayout?
@@ -29,6 +30,7 @@ where
     public init(
         collections: Collections,
         collectionSection: [Section],
+        supplementaryKinds: [String] = [],
         viewLayout: UICollectionViewLayout? = nil,
         snapshotCustomize: SnapshotCustomize? = nil,
         rawCustomize: RawCustomize? = nil,
@@ -38,6 +40,7 @@ where
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
         self.collectionSection = collectionSection
+        self.supplementaryKinds = supplementaryKinds
         self.snapshotCustomize = snapshotCustomize
         self.content = content
     }

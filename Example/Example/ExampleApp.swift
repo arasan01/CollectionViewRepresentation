@@ -12,18 +12,16 @@ struct ExampleApp: App {
     func createLayout() -> UICollectionViewLayout {
         
         let config = UICollectionViewCompositionalLayoutConfiguration()
-//        config.interSectionSpacing = 20
+        config.interSectionSpacing = 20
         
         let layout = UICollectionViewCompositionalLayout(sectionProvider: {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             
             let leadingItem = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(1.0)))
-//            leadingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             
             let trailingItem = NSCollectionLayoutItem(layoutSize: NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(1.0), heightDimension: .fractionalHeight(0.3)))
-//            trailingItem.contentInsets = NSDirectionalEdgeInsets(top: 10, leading: 10, bottom: 10, trailing: 10)
             let trailingGroup = NSCollectionLayoutGroup.vertical(layoutSize: NSCollectionLayoutSize(
                 widthDimension: .fractionalWidth(0.3), heightDimension: .fractionalHeight(1.0)),
                                                                  subitem: trailingItem,
@@ -34,6 +32,14 @@ struct ExampleApp: App {
                                                    heightDimension: .fractionalHeight(0.4)),
                 subitems: [leadingItem, trailingGroup])
             let section = NSCollectionLayoutSection(group: containerGroup)
+            
+            let sectionHeader = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
+                                                   heightDimension: .estimated(44)),
+                elementKind: "header",
+                alignment: .top)
+            sectionHeader.pinToVisibleBounds = true
+            section.boundarySupplementaryItems = [sectionHeader]
             section.orthogonalScrollingBehavior = .continuousGroupLeadingBoundary
             return section
             
@@ -44,6 +50,7 @@ struct ExampleApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView(layout: createLayout())
+//            ContentView(layout: .tagCloud(width: 80, height: 80))
         }
     }
 }

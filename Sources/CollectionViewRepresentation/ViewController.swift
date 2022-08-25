@@ -51,13 +51,26 @@ extension CollectionView {
         }
         
         private func configureDataSource() {
-            let cellRegistration = UICollectionView.CellRegistration<CustomConfigurationCell, ViewData> {
-                (cell: CustomConfigurationCell, indexPath: IndexPath, data: ViewData) in
+            let cellRegistration = UICollectionView.CellRegistration<CustomConfigurationCell<CellContent>, ViewData> {
+                (cell: CustomConfigurationCell<CellContent>, indexPath: IndexPath, data: ViewData) in
                 guard let section = Section(rawValue: indexPath.section) else {
                     cell.cellContent = self.coordinator.view.content(Section(rawValue: 0)!, data)
                     return
                 }
                 cell.cellContent = self.coordinator.view.content(section, data)
+            }
+            
+            let supplementaryRegistrations = coordinator.view.supplementaryKinds.map { kind in
+                UICollectionView.SupplementaryRegistration<CustomSupplementaryView<AnyView>>(
+                    elementKind: kind
+                ) { (supplementaryView: CustomSupplementaryView<AnyView>, elementKind: String, indexPath: IndexPath) in
+                    guard
+                        let dataId = self.dataSource.itemIdentifier(for: indexPath),
+                        let data = self.coordinator.view.collections.first(where: {$0.id == dataId})
+                    else { return }
+                    print(data)
+                    supplementaryView.cellContent = AnyView(Text("supplementary-\(elementKind), \(indexPath.section)"))
+                }
             }
             
             dataSource = UICollectionViewDiffableDataSource<Section, ViewData.ID>(collectionView: collectionView) {
@@ -66,6 +79,14 @@ extension CollectionView {
                     using: cellRegistration,
                     for: indexPath,
                     item: self.coordinator.view.collections.first {$0.id == dataId})
+            }
+            
+            dataSource.supplementaryViewProvider = {
+                (_: UICollectionView, kind: String, index: IndexPath) -> UICollectionReusableView? in
+                guard let registrationIndex = self.coordinator.view.supplementaryKinds.firstIndex(of: kind) else { return nil }
+                return self.collectionView.dequeueConfiguredReusableSupplementary(
+                    using: supplementaryRegistrations[registrationIndex],
+                    for: index)
             }
             
             var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData.ID>()

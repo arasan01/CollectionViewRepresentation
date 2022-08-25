@@ -21,6 +21,7 @@ struct ContentView: View {
         CollectionView(
             collections: texts,
             collectionSection: [Section.main, .sub, .bench],
+            supplementaryKinds: ["header"],
             viewLayout: layout,
             snapshotCustomize: { snapshot, collections in
                 for data in collections {
@@ -121,5 +122,7 @@ struct ContentView_Previews: PreviewProvider {
         ContentView(layout: nil)
         
         ContentView(layout: Self.createLayout())
+        
+        ContentView(layout: .tagCloud())
     }
 }
