@@ -157,7 +157,7 @@ struct FullComplexCollectionView: View {
             }
         }
         .onReceive(Timer.publish(every: refreshTimeInterval, on: .main, in: .common).autoconnect()) { _ in
-            self.texts = self.texts.map({ $0 })
+            self.texts = self.texts.shuffled()
         }
         
         Spacer()

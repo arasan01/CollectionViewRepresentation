@@ -12,4 +12,4 @@ enum SegmentState {
     case v1, v2, v3
 }
 
-let refreshTimeInterval: TimeInterval = 5.0
+let refreshTimeInterval: TimeInterval = 1.5

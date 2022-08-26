@@ -64,10 +64,15 @@ extension CollectionView {
         }
         
         private func configureHierarchy() {
-            collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            collectionView.frame = view.bounds
-            collectionView.backgroundColor = .systemBackground
             view.addSubview(collectionView)
+            collectionView.translatesAutoresizingMaskIntoConstraints = false
+            NSLayoutConstraint.activate([
+                collectionView.topAnchor.constraint(equalTo: view.topAnchor),
+                collectionView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+                collectionView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+                collectionView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ])
+            collectionView.backgroundColor = .systemBackground
         }
         
         private func configureDataSource() {
