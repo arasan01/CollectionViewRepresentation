@@ -73,7 +73,7 @@ where
     }
 }
 
-extension CollectionView where Section == NonSelectSection {
+extension CollectionView where Section == SingleSection {
     
     public init(
         collections: Collections,
@@ -87,7 +87,7 @@ extension CollectionView where Section == NonSelectSection {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
-        self.collectionSection = [NonSelectSection.main]
+        self.collectionSection = [SingleSection.main]
         self.supplementaryKinds = supplementaryKinds
         self.snapshotCustomize = nil
         self.supplementaryContent = supplementaryContent
@@ -118,7 +118,7 @@ extension CollectionView where SupplementaryContent == EmptyView {
     }
 }
 
-extension CollectionView where SupplementaryContent == EmptyView, Section == NonSelectSection {
+extension CollectionView where SupplementaryContent == EmptyView, Section == SingleSection {
     
     public init(
         collections: Collections,
@@ -129,7 +129,7 @@ extension CollectionView where SupplementaryContent == EmptyView, Section == Non
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
-        self.collectionSection = [NonSelectSection.main]
+        self.collectionSection = [SingleSection.main]
         self.supplementaryKinds = []
         self.snapshotCustomize = nil
         self.supplementaryContent = { _, _ in
@@ -139,7 +139,7 @@ extension CollectionView where SupplementaryContent == EmptyView, Section == Non
     }
 }
 
-public enum NonSelectSection: Int {
+public enum SingleSection: Int {
     case main
 }
 
