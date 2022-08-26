@@ -18,6 +18,7 @@ where
     public typealias ViewData = Collections.Element
     public typealias SupplementaryKind = String
     public typealias Content = (Section, ViewData) -> CellContent
+    public typealias SingleContent = (ViewData) -> CellContent
     public typealias SupplementaryProvider = (SupplementaryKind, ViewData) -> SupplementaryContent
     public typealias SnapshotCustomize = (
         inout NSDiffableDataSourceSnapshot<Section, ViewData.ID>, Collections) -> Void
@@ -40,8 +41,8 @@ where
         snapshotCustomize: SnapshotCustomize? = nil,
         rawCustomize: RawCustomize? = nil,
         @ViewBuilder supplementaryContent: @escaping SupplementaryProvider,
-        @ViewBuilder content: @escaping Content)
-    {
+        @ViewBuilder content: @escaping Content
+    ) {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
@@ -65,7 +66,7 @@ where
     
     public func updateUIViewController(_ viewController: ViewController, context: Context) {
         context.coordinator.view = self
-        if let viewLayout {
+        if let viewLayout = viewLayout {
             viewController.collectionView.collectionViewLayout = viewLayout
         }
         self.rawCustomize?(viewController.collectionView)
@@ -82,8 +83,8 @@ extension CollectionView where Section == SingleSection {
         snapshotCustomize: SnapshotCustomize? = nil,
         rawCustomize: RawCustomize? = nil,
         @ViewBuilder supplementaryContent: @escaping SupplementaryProvider,
-        @ViewBuilder content: @escaping Content)
-    {
+        @ViewBuilder content: @escaping SingleContent
+    ) {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
@@ -91,7 +92,7 @@ extension CollectionView where Section == SingleSection {
         self.supplementaryKinds = supplementaryKinds
         self.snapshotCustomize = nil
         self.supplementaryContent = supplementaryContent
-        self.content = content
+        self.content = { (_, data: ViewData) -> CellContent in content(data) }
     }
 }
 
@@ -103,17 +104,15 @@ extension CollectionView where SupplementaryContent == EmptyView {
         viewLayout: UICollectionViewLayout? = nil,
         snapshotCustomize: SnapshotCustomize? = nil,
         rawCustomize: RawCustomize? = nil,
-        @ViewBuilder content: @escaping Content)
-    {
+        @ViewBuilder content: @escaping Content
+    ) {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
         self.collectionSection = collectionSection
         self.supplementaryKinds = []
         self.snapshotCustomize = snapshotCustomize
-        self.supplementaryContent = { _, _ in
-            EmptyView()
-        }
+        self.supplementaryContent = { _, _ in EmptyView() }
         self.content = content
     }
 }
@@ -124,18 +123,16 @@ extension CollectionView where SupplementaryContent == EmptyView, Section == Sin
         collections: Collections,
         viewLayout: UICollectionViewLayout? = nil,
         rawCustomize: RawCustomize? = nil,
-        @ViewBuilder content: @escaping Content)
-    {
+        @ViewBuilder content: @escaping SingleContent
+    ) {
         self.collections = collections
         self.viewLayout = viewLayout
         self.rawCustomize = rawCustomize
         self.collectionSection = [SingleSection.main]
         self.supplementaryKinds = []
         self.snapshotCustomize = nil
-        self.supplementaryContent = { _, _ in
-            EmptyView()
-        }
-        self.content = content
+        self.supplementaryContent = { _, _ in EmptyView() }
+        self.content = { (_, data: ViewData) -> CellContent in content(data) }
     }
 }
 

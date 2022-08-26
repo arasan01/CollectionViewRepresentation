@@ -95,7 +95,7 @@ struct SupplementaryCollectionView: View {
                         .foregroundColor(.white)
                 }
             }
-        } content: { (_, data: TextGram) in
+        } content: { (data: TextGram) in
             Rectangle()
                 .foregroundColor(.orange.opacity(0.7))
                 .padding(8)
