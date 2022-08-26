@@ -3,7 +3,7 @@ import UIKit
 extension CollectionView {
     public final class ViewController : UIViewController {
         
-        var dataSource: UICollectionViewDiffableDataSource<Section, ViewData>! = nil
+        var dataSource: DataSource<Section, ViewData>! = nil
         var collectionView: UICollectionView! = nil
         weak var coordinator: Coordinator!
         
@@ -27,17 +27,17 @@ extension CollectionView {
         public func apply(for collections: Collections, animatingDifferences: Bool = true) {
             switch (coordinator.view.snapshotCustomize, coordinator.view.sectionSnapshotCustomize) {
             case (let .some(applySnapshot), .none):
-                var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData>()
+                var snapshot = Snapshot<Section, ViewData>()
                 snapshot.appendSections(coordinator.view.collectionSection)
                 applySnapshot(&snapshot, collections)
                 dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
                 
             case (.none, let .some(applySectionSnapshot)):
-                var sections = NSDiffableDataSourceSnapshot<Section, ViewData>()
+                var sections = Snapshot<Section, ViewData>()
                 sections.appendSections(coordinator.view.collectionSection)
                 dataSource.apply(sections, animatingDifferences: false)
                 
-                var container = Dictionary<Section, NSDiffableDataSourceSectionSnapshot<ViewData>>()
+                var container = Dictionary<Section, SectionSnapshot<ViewData>>()
                 for section in coordinator.view.collectionSection {
                     container[section] = .init()
                 }
@@ -47,7 +47,7 @@ extension CollectionView {
                 }
                 
             case (.none, .none):
-                var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData>()
+                var snapshot = Snapshot<Section, ViewData>()
                 snapshot.appendSections(coordinator.view.collectionSection)
                 snapshot.appendItems(Array(collections))
                 dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
@@ -79,10 +79,11 @@ extension CollectionView {
             let cellRegistration = UICollectionView.CellRegistration<CustomConfigurationCell<CellContent>, ViewData> {
                 (cell: CustomConfigurationCell<CellContent>, indexPath: IndexPath, data: ViewData) in
                 guard let section = Section(rawValue: indexPath.section) else {
-                    cell.cellContent = self.coordinator.view.content(Section(rawValue: 0)!, data)
+                    cell.cellContent = self.coordinator.view.content(&self.dataSource, Section(rawValue: 0)!, data)
                     return
                 }
-                cell.cellContent = self.coordinator.view.content(section, data)
+                cell.cellContent = self.coordinator.view.content(&self.dataSource, section, data)
+                
             }
             
             let supplementaryRegistrations = coordinator.view.supplementaryKinds.map { kind in
