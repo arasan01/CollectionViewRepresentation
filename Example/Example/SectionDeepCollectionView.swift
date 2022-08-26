@@ -91,6 +91,7 @@ struct SectionDeepCollectionView: View {
             }
             
             addItems(menuItems, to: nil)
+            container[.main] = snapshot
         } content: { (data: OutlineItem) in
             Text(data.title)
         }
