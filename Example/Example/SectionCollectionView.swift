@@ -1,10 +1,3 @@
-//
-//  SectionCollectionView.swift
-//  Example
-//
-//  Created by arasan01 on 2022/08/26.
-//
-
 import SwiftUI
 import CollectionViewRepresentation
 
@@ -52,15 +45,15 @@ struct SectionCollectionView: View {
             collections: texts,
             collectionSection: [Section.main, .sub, .bench],
             viewLayout: Self.createLayout()
-        ) { (snapshot: inout NSDiffableDataSourceSnapshot<Section, TextGram.ID>, collections: [TextGram]) in
+        ) { (snapshot: inout Snapshot<Section, TextGram>, collections: [TextGram]) in
             for data in collections {
                 switch Float.random(in: 0...1) {
                 case 0..<0.333:
-                    snapshot.appendItems([data.id], toSection: .main)
+                    snapshot.appendItems([data], toSection: .main)
                 case 0.333..<0.666:
-                    snapshot.appendItems([data.id], toSection: .sub)
+                    snapshot.appendItems([data], toSection: .sub)
                 case 0.666...1.0:
-                    snapshot.appendItems([data.id], toSection: .bench)
+                    snapshot.appendItems([data], toSection: .bench)
                 default:
                     fatalError("logic miss")
                 }

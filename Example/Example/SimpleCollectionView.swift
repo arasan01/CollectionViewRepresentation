@@ -1,10 +1,3 @@
-//
-//  SimpleCollectionView.swift
-//  Example
-//
-//  Created by arasan01 on 2022/08/25.
-//
-
 import SwiftUI
 import UIKit
 import CollectionViewRepresentation

@@ -1,10 +1,9 @@
 import UIKit
-import SwiftUI
 
 extension CollectionView {
     public final class ViewController : UIViewController {
         
-        var dataSource: UICollectionViewDiffableDataSource<Section, ViewData.ID>! = nil
+        var dataSource: UICollectionViewDiffableDataSource<Section, ViewData>! = nil
         var collectionView: UICollectionView! = nil
         weak var coordinator: Coordinator!
         
@@ -25,16 +24,37 @@ extension CollectionView {
             configureDataSource()
         }
         
-        public func apply(for newCollections: Collections) {
-            var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData.ID>()
-            if let apply = coordinator.view.snapshotCustomize {
+        public func apply(for collections: Collections, animatingDifferences: Bool = true) {
+            switch (coordinator.view.snapshotCustomize, coordinator.view.sectionSnapshotCustomize) {
+            case (let .some(applySnapshot), .none):
+                var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData>()
                 snapshot.appendSections(coordinator.view.collectionSection)
-                apply(&snapshot, newCollections)
-            } else {
+                applySnapshot(&snapshot, collections)
+                dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+                
+            case (.none, let .some(applySectionSnapshot)):
+                var sections = NSDiffableDataSourceSnapshot<Section, ViewData>()
+                sections.appendSections(coordinator.view.collectionSection)
+                dataSource.apply(sections, animatingDifferences: false)
+                
+                var container = Dictionary<Section, NSDiffableDataSourceSectionSnapshot<ViewData>>()
+                for section in coordinator.view.collectionSection {
+                    container[section] = .init()
+                }
+                applySectionSnapshot(&container, collections)
+                for (section, snapshot) in container {
+                    dataSource.apply(snapshot, to: section, animatingDifferences: animatingDifferences)
+                }
+                
+            case (.none, .none):
+                var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData>()
                 snapshot.appendSections(coordinator.view.collectionSection)
-                snapshot.appendItems(coordinator.view.collections.map(\.id))
+                snapshot.appendItems(Array(collections))
+                dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
+                
+            case (.some, .some):
+                fatalError("There must not be two customizers.")
             }
-            dataSource.apply(snapshot, animatingDifferences: true)
         }
         
         private func configureCollectionView() {
@@ -64,21 +84,14 @@ extension CollectionView {
                 UICollectionView.SupplementaryRegistration<CustomSupplementaryView<SupplementaryContent>>(
                     elementKind: kind
                 ) { (supplementaryView: CustomSupplementaryView<SupplementaryContent>, elementKind: String, indexPath: IndexPath) in
-                    guard
-                        let dataId = self.dataSource.itemIdentifier(for: indexPath),
-                        let data = self.coordinator.view.collections.first(where: {$0.id == dataId})
-                    else { return }
-                    supplementaryView.cellContent = self.coordinator.view
-                        .supplementaryContent(elementKind, data)
+                    guard let data = self.dataSource.itemIdentifier(for: indexPath) else { return }
+                    supplementaryView.cellContent = self.coordinator.view.supplementaryContent(elementKind, data)
                 }
             }
             
-            dataSource = UICollectionViewDiffableDataSource<Section, ViewData.ID>(collectionView: collectionView) {
-                (collectionView: UICollectionView, indexPath: IndexPath, dataId: ViewData.ID) -> UICollectionViewCell? in
-                return collectionView.dequeueConfiguredReusableCell(
-                    using: cellRegistration,
-                    for: indexPath,
-                    item: self.coordinator.view.collections.first {$0.id == dataId})
+            dataSource = UICollectionViewDiffableDataSource<Section, ViewData>(collectionView: collectionView) {
+                (collectionView: UICollectionView, indexPath: IndexPath, data: ViewData) -> UICollectionViewCell? in
+                return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: data)
             }
             
             dataSource.supplementaryViewProvider = {
@@ -89,15 +102,7 @@ extension CollectionView {
                     for: index)
             }
             
-            var snapshot = NSDiffableDataSourceSnapshot<Section, ViewData.ID>()
-            if let apply = coordinator.view.snapshotCustomize {
-                snapshot.appendSections(coordinator.view.collectionSection)
-                apply(&snapshot, coordinator.view.collections)
-            } else {
-                snapshot.appendSections(coordinator.view.collectionSection)
-                snapshot.appendItems(coordinator.view.collections.map(\.id))
-            }
-            dataSource.apply(snapshot, animatingDifferences: false)
+            apply(for: coordinator.view.collections, animatingDifferences: false)
         }
     }
 }

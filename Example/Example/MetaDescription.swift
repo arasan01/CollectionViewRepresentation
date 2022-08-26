@@ -1,10 +1,3 @@
-//
-//  MetaDescription.swift
-//  Example
-//
-//  Created by arasan01 on 2022/08/25.
-//
-
 import Foundation
 
 enum Section: Int {

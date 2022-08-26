@@ -1,10 +1,3 @@
-//
-//  SupplementaryCollectionView.swift
-//  Example
-//
-//  Created by arasan01 on 2022/08/26.
-//
-
 import SwiftUI
 import CollectionViewRepresentation
 

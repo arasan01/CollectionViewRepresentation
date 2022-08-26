@@ -1,10 +1,3 @@
-//
-//  OutlineView.swift
-//  Example
-//
-//  Created by arasan01 on 2022/08/26.
-//
-
 import SwiftUI
 
 struct OutlineView: View {
@@ -17,6 +10,9 @@ struct OutlineView: View {
                 NavigationLink("Section View", destination: SectionCollectionView())
                     .padding(8)
                     .background(Color.pink.opacity(0.2))
+                NavigationLink("Section Deeply View", destination: SectionDeepCollectionView())
+                    .padding(8)
+                    .background(Color.orange.opacity(0.2))
                 NavigationLink("Supplementary view", destination: SupplementaryCollectionView())
                     .padding(8)
                     .background(Color.yellow.opacity(0.2))
