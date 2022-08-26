@@ -148,7 +148,7 @@ extension CollectionView {
     public final class Coordinator {
         
         var view: CollectionView
-        var viewController: ViewController?
+        weak var viewController: ViewController?
         
         init(view: CollectionView) {
             self.view = view
