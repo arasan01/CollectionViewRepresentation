@@ -3,12 +3,12 @@ import UIKit
 extension CollectionView {
     public final class ViewController : UIViewController {
         
-        var dataSource: DataSource<Section, ViewData>! = nil
+        var dataSource: DataSource<Grouping, ViewData>! = nil
         var collectionView: UICollectionView! = nil
-        weak var coordinator: Coordinator!
+        public var repview: CollectionView
         
-        init(coordinator: Coordinator) {
-            self.coordinator = coordinator
+        init(repview: CollectionView) {
+            self.repview = repview
             super.init(nibName: nil, bundle: nil)
             configureCollectionView()
         }
@@ -25,20 +25,20 @@ extension CollectionView {
         }
         
         public func apply(for collections: Collections, animatingDifferences: Bool = true) {
-            switch (coordinator.view.snapshotCustomize, coordinator.view.sectionSnapshotCustomize) {
+            switch (repview.snapshotCustomize, repview.sectionSnapshotCustomize) {
             case (let .some(applySnapshot), .none):
-                var snapshot = Snapshot<Section, ViewData>()
-                snapshot.appendSections(coordinator.view.collectionSection)
+                var snapshot = Snapshot<Grouping, ViewData>()
+                snapshot.appendSections(repview.collectionSection)
                 applySnapshot(&snapshot, collections)
                 dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
                 
             case (.none, let .some(applySectionSnapshot)):
-                var sections = Snapshot<Section, ViewData>()
-                sections.appendSections(coordinator.view.collectionSection)
+                var sections = Snapshot<Grouping, ViewData>()
+                sections.appendSections(repview.collectionSection)
                 dataSource.apply(sections, animatingDifferences: false)
                 
-                var container = Dictionary<Section, SectionSnapshot<ViewData>>()
-                for section in coordinator.view.collectionSection {
+                var container = Dictionary<Grouping, SectionSnapshot<ViewData>>()
+                for section in repview.collectionSection {
                     container[section] = .init()
                 }
                 applySectionSnapshot(&container, collections)
@@ -47,8 +47,8 @@ extension CollectionView {
                 }
                 
             case (.none, .none):
-                var snapshot = Snapshot<Section, ViewData>()
-                snapshot.appendSections(coordinator.view.collectionSection)
+                var snapshot = Snapshot<Grouping, ViewData>()
+                snapshot.appendSections(repview.collectionSection)
                 snapshot.appendItems(Array(collections))
                 dataSource.apply(snapshot, animatingDifferences: animatingDifferences)
                 
@@ -78,37 +78,37 @@ extension CollectionView {
         private func configureDataSource() {
             let cellRegistration = UICollectionView.CellRegistration<CustomConfigurationCell<CellContent>, ViewData> {
                 (cell: CustomConfigurationCell<CellContent>, indexPath: IndexPath, data: ViewData) in
-                guard let section = Section(rawValue: indexPath.section) else {
-                    cell.cellContent = self.coordinator.view.content(&self.dataSource, Section(rawValue: 0)!, data)
+                guard let section = Grouping(rawValue: indexPath.section) else {
+                    cell.cellContent = self.repview.content(&self.dataSource, Grouping(rawValue: 0)!, data)
                     return
                 }
-                cell.cellContent = self.coordinator.view.content(&self.dataSource, section, data)
+                cell.cellContent = self.repview.content(&self.dataSource, section, data)
                 
             }
             
-            let supplementaryRegistrations = coordinator.view.supplementaryKinds.map { kind in
+            let supplementaryRegistrations = repview.supplementaryKinds.map { kind in
                 UICollectionView.SupplementaryRegistration<CustomSupplementaryView<SupplementaryContent>>(
                     elementKind: kind
                 ) { (supplementaryView: CustomSupplementaryView<SupplementaryContent>, elementKind: String, indexPath: IndexPath) in
                     guard let data = self.dataSource.itemIdentifier(for: indexPath) else { return }
-                    supplementaryView.cellContent = self.coordinator.view.supplementaryContent(elementKind, data)
+                    supplementaryView.cellContent = self.repview.supplementaryContent(elementKind, data)
                 }
             }
             
-            dataSource = UICollectionViewDiffableDataSource<Section, ViewData>(collectionView: collectionView) {
+            dataSource = UICollectionViewDiffableDataSource<Grouping, ViewData>(collectionView: collectionView) {
                 (collectionView: UICollectionView, indexPath: IndexPath, data: ViewData) -> UICollectionViewCell? in
                 return collectionView.dequeueConfiguredReusableCell(using: cellRegistration, for: indexPath, item: data)
             }
             
             dataSource.supplementaryViewProvider = {
                 (_: UICollectionView, kind: String, index: IndexPath) -> UICollectionReusableView? in
-                guard let registrationIndex = self.coordinator.view.supplementaryKinds.firstIndex(of: kind) else { return nil }
+                guard let registrationIndex = self.repview.supplementaryKinds.firstIndex(of: kind) else { return nil }
                 return self.collectionView.dequeueConfiguredReusableSupplementary(
                     using: supplementaryRegistrations[registrationIndex],
                     for: index)
             }
             
-            apply(for: coordinator.view.collections, animatingDifferences: false)
+            apply(for: repview.collections, animatingDifferences: false)
         }
     }
 }

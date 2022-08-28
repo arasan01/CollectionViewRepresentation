@@ -75,7 +75,7 @@ struct SupplementaryCollectionView: View {
                 Supplementary.badge2.rawValue,
             ],
             viewLayout: Self.createLayout()
-        ) { (kind: String, data: TextGram) in
+        ) { kind, data in
             switch Supplementary(rawValue: kind)! {
             case .header, .footer:
                 Text("\(kind) - supplementary")

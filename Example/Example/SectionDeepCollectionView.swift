@@ -80,7 +80,7 @@ struct SectionDeepCollectionView: View {
         CollectionView(
             collections: menuItems,
             viewLayout: UICollectionViewCompositionalLayout.list(using: .init(appearance: .sidebar))
-        ) { (container: inout Dictionary<SingleSection, SectionSnapshot<OutlineItem>>, collections: [OutlineItem]) in
+        ) { container, collections in
             var snapshot = container[.main]!
             
             func addItems(_ menuItems: [OutlineItem], to parent: OutlineItem?) {
@@ -92,8 +92,36 @@ struct SectionDeepCollectionView: View {
             
             addItems(menuItems, to: nil)
             container[.main] = snapshot
-        } content: { (data: OutlineItem) in
-            Text(data.title)
+        } content: { source, section, data in
+            var sectionSnapshot = source.snapshot(for: section)
+
+            if !sectionSnapshot.isExpanded(data) {
+                Button { [source = source] in
+                    var sectionSnapshot = source.snapshot(for: section)
+                    sectionSnapshot.collapse([data])
+                    source.apply(sectionSnapshot, to: section)
+                } label: {
+                    HStack {
+                        Text(data.title)
+                        Spacer()
+                        Image(systemName: "chevron.forward")
+                            .padding(2)
+                    }
+                }.buttonStyle(.plain)
+            } else {
+                Button { [source = source] in
+                    var sectionSnapshot = source.snapshot(for: section)
+                    sectionSnapshot.collapse([data])
+                    source.apply(sectionSnapshot, to: section)
+                } label: {
+                    HStack {
+                        Text(data.title)
+                        Spacer()
+                        Image(systemName: "chevron.down")
+                            .padding(2)
+                    }
+                }.buttonStyle(.plain)
+            }
         }
     }
 }

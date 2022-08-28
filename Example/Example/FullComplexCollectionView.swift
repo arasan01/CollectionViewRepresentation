@@ -106,7 +106,7 @@ struct FullComplexCollectionView: View {
                     return UICollectionViewCompositionalLayout.list(using: .init(appearance: .plain))
                 }
             }()
-        ) { (snapshot: inout Snapshot<Section, TextGram>, collections: [TextGram]) in
+        ) { snapshot, collections in
             for data in collections {
                 switch Float.random(in: 0...1) {
                 case 0..<0.333:

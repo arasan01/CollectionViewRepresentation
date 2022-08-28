@@ -57,7 +57,7 @@ struct SimpleCollectionView: View {
         CollectionView(
             collections: texts,
             viewLayout: Self.createLayout(behavior: behaviorState)
-        ) { (data: TextGram) in
+        ) { data in
             VStack {
                 Rectangle()
                     .foregroundColor(.orange.opacity(0.7))

@@ -10,10 +10,6 @@ struct SectionCollectionView: View {
         let layout = UICollectionViewCompositionalLayout(sectionProvider: {
             (sectionIndex: Int, layoutEnvironment: NSCollectionLayoutEnvironment) -> NSCollectionLayoutSection? in
             
-            let badgeAnchor = NSCollectionLayoutAnchor(edges: [.top, .trailing], fractionalOffset: CGPoint(x: 0, y: 0))
-            let badgeSize = NSCollectionLayoutSize(widthDimension: .absolute(20),
-                                                   heightDimension: .absolute(20))
-            
             let leadingItem = NSCollectionLayoutItem(
                 layoutSize: NSCollectionLayoutSize(widthDimension: .fractionalWidth(0.7), heightDimension: .fractionalHeight(1.0))
             )
@@ -45,7 +41,7 @@ struct SectionCollectionView: View {
             collections: texts,
             collectionSection: [Section.main, .sub, .bench],
             viewLayout: Self.createLayout()
-        ) { (snapshot: inout Snapshot<Section, TextGram>, collections: [TextGram]) in
+        ) { snapshot, collections in
             for data in collections {
                 switch Float.random(in: 0...1) {
                 case 0..<0.333:
